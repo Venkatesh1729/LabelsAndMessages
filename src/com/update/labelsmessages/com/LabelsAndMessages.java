@@ -28,7 +28,6 @@ public class LabelsAndMessages
 		StringBuffer stringBuffer = null;
 
 		String newFileLine = "", messageFileLine = "", fileContent = "", updateMessageKey = "", updateMessageValue = "";
-		// String flag = "";
 		int startIndex = 0;
 		int lastIndex = 0;
 
@@ -50,7 +49,7 @@ public class LabelsAndMessages
 				startIndex = fileContent.indexOf("\"", tempIndex + 1);
 				lastIndex = fileContent.indexOf("\"", startIndex + 1);
 
-				// fileContent = fileContent.replace(fileContent.substring(startIndex+1,lastIndex), updateMessageValue);
+				fileContent = fileContent.replace(fileContent.substring(startIndex+1,lastIndex), updateMessageValue);
 
 			}
 
