@@ -55,9 +55,9 @@ public class LabelsAndMessages
 			}
 
 		}
-		//updateAndCreateMsgBr.close();
+		updateAndCreateMsgBr.close();
 
-			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
+		updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
 		stringBuffer = new StringBuffer(fileContent) ;
 		commaIndex = fileContent.indexOf(",", fileContent.lastIndexOf("\""));
 		if (commaIndex > -1) {
