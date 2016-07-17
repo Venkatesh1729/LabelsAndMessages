@@ -55,7 +55,7 @@ public class LabelsAndMessages
 			}
 
 		}
-		updateAndCreateMsgBr.close();
+		//updateAndCreateMsgBr.close();
 
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
 		stringBuffer = new StringBuffer(fileContent) ;
