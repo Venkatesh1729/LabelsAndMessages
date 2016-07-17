@@ -1,0 +1,2 @@
+PROVIDE_ALL_MANDATORY_FIELDS : "Provide all the mandatory fields.",
+PROVIDE_THE_MANDATORY_FIELDS : "Provide the mandatory fields.",
