@@ -61,12 +61,12 @@ public class LabelsAndMessages
 		commaIndex = fileContent.indexOf(",", fileContent.lastIndexOf("\""));
 		if (commaIndex > -1) {
 			while ((newFileLine = updateAndCreateMsgBr.readLine()) != null) {
-				stringBuffer.insert(fileContent.lastIndexOf("\"") + 1, "\n" + newFileLine);
+				stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
 			}
 		} else if (commaIndex == -1) {
-			stringBuffer.insert(fileContent.lastIndexOf("\"") + 1, ",");
+			stringBuffer.insert(stringBuffer.lastIndexOf("\"") + 1, ",");
 			while ((newFileLine = updateAndCreateMsgBr.readLine()) != null) {
-				stringBuffer.insert(fileContent.lastIndexOf("\"") + 1, "\n" + newFileLine);
+				stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
 			}
 		}
 
