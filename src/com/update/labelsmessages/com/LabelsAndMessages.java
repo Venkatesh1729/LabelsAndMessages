@@ -32,6 +32,7 @@ public class LabelsAndMessages
 
 		try {
 
+			// For Messages
 			StringBuffer stringBuffer = new StringBuffer();
 			String messageFileLine = "";
 
@@ -46,6 +47,7 @@ public class LabelsAndMessages
 			writerMessage.write(stringBuffer.toString());
 			updateAndCreateMsgBr.close();
 
+			// For Labels
 			String labelFileLine = "";
 			stringBuffer.delete(0, stringBuffer.length());
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateLabelsFile)));
