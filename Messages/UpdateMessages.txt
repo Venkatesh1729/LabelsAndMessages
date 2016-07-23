@@ -1,0 +1,4 @@
+NEW_MESSAGE_ONE : "Message not exist one",
+MESSAGE4 : "Update Message one",
+NEW_MESSAGE_TWO : "Message not exist two",
+MESSAGE7 : "Update Message two",

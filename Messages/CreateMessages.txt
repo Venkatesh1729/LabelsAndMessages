@@ -1,2 +1,4 @@
-PROVIDE_ALL_MANDATORY_FIELDS : "Provide all the mandatory fields.",
-PROVIDE_THE_MANDATORY_FIELDS : "Provide the mandatory fields.",
+NEW_MESSAGE_ONE : "New Message one",
+MESSAGE3 : "Same key exist",
+SAME_VALUE_EXIST : "Message 5",
+NEW_MESSAGE_TWO : "New Message two",
