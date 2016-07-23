@@ -14,17 +14,14 @@ public class LabelsAndMessages
 
 	public static void main(String[] args) throws IOException {
 
-		File messagesEnFile = new File("D:\\EPM 5.0\\staticContent\\ui\\js\\core\\common\\messages_en.js");
-		File labelsEnFile = new File("D:\\EPM 5.0\\staticContent\\ui\\js\\core\\common\\labels_en.js");
+		File messagesEnFile = new File("Messages/messages_en.js");
+		File labelsEnFile = new File("Labels/labels_en.js");
 
-		File updateMessagesFile = new File("C:\\Users\\vsethu\\Desktop\\Labels and Messages\\UpdateMessages.txt");
-		File updateLabelsFile = new File("C:\\Users\\vsethu\\Desktop\\UpdateLabels.txt");
+		File updateMessagesFile = new File("Messages/UpdateMessages.txt");
+		File updateLabelsFile = new File("Labels/UpdateLabels.txt");
 
-		File createMessagesFile = new File("C:\\Users\\vsethu\\Desktop\\Labels and Messages\\CreateMessages.txt");
-		File createLabelsFile = new File("C:\\Users\\vsethu\\Desktop\\CreateLabels.txt");
-
-		FileWriter writerMessage = new FileWriter("D:\\EPM 5.0\\staticContent\\ui\\js\\core\\common\\messages_en.js");
-		FileWriter writerLabel = new FileWriter("D:\\EPM 5.0\\staticContent\\ui\\js\\core\\common\\labels_en.js");
+		File createMessagesFile = new File("Messages/CreateMessages.txt");
+		File createLabelsFile = new File("Labels/CreateLabels.txt");
 
 		BufferedReader updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateMessagesFile)));
 		BufferedReader messagesEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(messagesEnFile)));
@@ -44,7 +41,9 @@ public class LabelsAndMessages
 
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
 			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			FileWriter writerMessage = new FileWriter(messagesEnFile);
 			writerMessage.write(stringBuffer.toString());
+			writerMessage.close();
 			updateAndCreateMsgBr.close();
 
 			// For Labels
@@ -59,7 +58,9 @@ public class LabelsAndMessages
 
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createLabelsFile)));
 			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			FileWriter writerLabel = new FileWriter(labelsEnFile);
 			writerLabel.write(stringBuffer.toString());
+			writerLabel.close();
 			updateAndCreateMsgBr.close();
 
 		} catch (IOException ex) {
@@ -67,8 +68,6 @@ public class LabelsAndMessages
 		} finally {
 			messagesEnBr.close();
 			labelsEnBr.close();
-			writerMessage.close();
-			writerLabel.close();
 		}
 	}
 
@@ -89,7 +88,7 @@ public class LabelsAndMessages
 				updateMessageValue = newFileLine.substring(startIndex + 1, lastIndex);
 				if (updateMessageKey.length() > 0 && isContain(stringBuffer.toString(), updateMessageKey)) {
 
-					tempIndex = stringBuffer.indexOf(updateMessageKey);
+					tempIndex = isFindIndex(stringBuffer.toString(), updateMessageKey);
 					startIndex = stringBuffer.indexOf("\"", tempIndex + 1);
 					tempIndex = stringBuffer.indexOf(",", startIndex + 1);
 					lastIndex = stringBuffer.lastIndexOf("\"", tempIndex);
@@ -160,6 +159,17 @@ public class LabelsAndMessages
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(source);
 		return m.find();
+	}
+	
+	private static int isFindIndex(String source, String subItem) {
+		int index = 0;
+		String pattern = "\\b" + subItem + "\\b";
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(source);
+		while(m.find()){
+			index = m.start();
+		}
+		return index;
 	}
 
 }
