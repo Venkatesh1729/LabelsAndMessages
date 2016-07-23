@@ -14,8 +14,8 @@ public class LabelsAndMessages
 
 	public static void main(String[] args) throws IOException {
 
-		File messagesEnFile = new File("Messages/messages_en.js");
-		File labelsEnFile = new File("Labels/labels_en.js");
+		File messagesEnFile = new File("Messages/messages.js");
+		File labelsEnFile = new File("Labels/labels.js");
 
 		File updateMessagesFile = new File("Messages/UpdateMessages.txt");
 		File updateLabelsFile = new File("Labels/UpdateLabels.txt");
