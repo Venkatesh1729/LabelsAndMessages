@@ -1,0 +1,4 @@
+NEW_LABEL_ONE : "New Label one",
+LABEL3 : "Same key exist",
+SAME_VALUE_EXIST : "Label 5",
+NEW_LABEL_TWO : "New Label two",

@@ -1,0 +1,4 @@
+NEW_LABEL_ONE : "Label not exist one",
+LABEL4 : "Update Label ONE",
+NEW_LABEL_TWO : "Label not exist two",
+LABEL7 : "Update Label TWO",
