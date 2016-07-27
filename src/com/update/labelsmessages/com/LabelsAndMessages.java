@@ -36,11 +36,11 @@ public class LabelsAndMessages
 			while ((messageFileLine = messagesEnBr.readLine()) != null)
 				stringBuffer.append(messageFileLine + "\r\n");
 
-			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "messages.js");
 			updateAndCreateMsgBr.close();
 
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
-			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "messages.js");
 			FileWriter writerMessage = new FileWriter(messagesEnFile);
 			writerMessage.write(stringBuffer.toString());
 			writerMessage.close();
@@ -53,11 +53,11 @@ public class LabelsAndMessages
 			while ((labelFileLine = labelsEnBr.readLine()) != null)
 				stringBuffer.append(labelFileLine + "\r\n");
 
-			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "labels.js");
 			updateAndCreateMsgBr.close();
 
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createLabelsFile)));
-			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer);
+			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "labels.js");
 			FileWriter writerLabel = new FileWriter(labelsEnFile);
 			writerLabel.write(stringBuffer.toString());
 			writerLabel.close();
@@ -71,7 +71,7 @@ public class LabelsAndMessages
 		}
 	}
 
-	public static StringBuffer updateLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer) {
+	public static StringBuffer updateLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName) {
 
 		String newFileLine = "", updateMessageKey = "", updateMessageValue = "";
 
@@ -92,11 +92,14 @@ public class LabelsAndMessages
 					startIndex = stringBuffer.indexOf("\"", tempIndex + 1);
 					tempIndex = stringBuffer.indexOf(",", startIndex + 1);
 					lastIndex = stringBuffer.lastIndexOf("\"", tempIndex);
-
-					stringBuffer.replace(startIndex + 1, lastIndex, updateMessageValue);
+					if (updateMessageValue.length() > 0 && isContain(stringBuffer.toString(), updateMessageValue)) {
+						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be updated, because it's value is already added in " + fileName);
+					} else {
+						stringBuffer.replace(startIndex + 1, lastIndex, updateMessageValue);
+					}
 
 				} else {
-					System.out.println("It the given key '" + updateMessageKey + "' is not present in the file");
+					System.out.println("The given key '" + updateMessageKey + "' is not present in " + fileName);
 				}
 
 			}
@@ -108,7 +111,7 @@ public class LabelsAndMessages
 
 	}
 
-	public static StringBuffer createLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer) throws IOException {
+	public static StringBuffer createLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName) throws IOException {
 
 		int commaIndex = 0;
 		int startIndex = 0;
@@ -124,9 +127,9 @@ public class LabelsAndMessages
 					lastIndex = newFileLine.lastIndexOf("\"");
 					updateMessageValue = newFileLine.substring(startIndex + 1, lastIndex);
 					if (updateMessageKey.length() > 0 && isContain(stringBuffer.toString(), updateMessageKey)) {
-						System.out.println("The given key and value '" + updateMessageKey + "' can't be inserted, it's key already added");
+						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's key is already added in " + fileName);
 					} else if (updateMessageValue.length() > 0 && isContain(stringBuffer.toString(), updateMessageValue)) {
-						System.out.println("The given key and value '" + updateMessageKey + "' can't be inserted, it's value already added");
+						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's value is already added in " + fileName);
 					} else {
 						stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
 					}
@@ -139,9 +142,9 @@ public class LabelsAndMessages
 					lastIndex = newFileLine.lastIndexOf("\"");
 					updateMessageValue = newFileLine.substring(startIndex + 1, lastIndex);
 					if (updateMessageKey.length() > 0 && isContain(stringBuffer.toString(), updateMessageKey)) {
-						System.out.println("The given key and value '" + updateMessageKey + "' can't be inserted, it's key already added");
+						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's key is already added in " + fileName);
 					} else if (updateMessageValue.length() > 0 && isContain(stringBuffer.toString(), updateMessageValue)) {
-						System.out.println("The given key and value '" + updateMessageKey + "' can't be inserted, it's value already added");
+						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's value is already added in " + fileName);
 					} else {
 						stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
 					}
@@ -160,13 +163,13 @@ public class LabelsAndMessages
 		Matcher m = p.matcher(source);
 		return m.find();
 	}
-	
+
 	private static int isFindIndex(String source, String subItem) {
 		int index = 0;
 		String pattern = "\\b" + subItem + "\\b";
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(source);
-		while(m.find()){
+		while (m.find()) {
 			index = m.start();
 		}
 		return index;
