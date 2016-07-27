@@ -12,56 +12,74 @@ import java.util.regex.Pattern;
 public class LabelsAndMessages
 {
 
+	private static File messagesEnFile = new File("Messages/messages.js");
+
+	private static File labelsEnFile = new File("Labels/labels.js");
+
+	private static File updateMessagesFile = new File("Messages/UpdateMessages.txt");
+
+	private static File updateLabelsFile = new File("Labels/UpdateLabels.txt");
+
+	private static File createMessagesFile = new File("Messages/CreateMessages.txt");
+
+	private static File createLabelsFile = new File("Labels/CreateLabels.txt");
+
+	private static File messagesEnScript = new File("Scripts/Messages_sc.sql");
+
+	private static File labelsEnScript = new File("Scripts/Labels_sc.sql");
+
+	private static File currentScript = new File("Scripts/Current_sc.sql");
+
+	private static StringBuffer addScriptBuffer = new StringBuffer();
+
+	private static String labelFile = "labels.js";
+
+	private static String messageFile = "messages.js";
+
+	/*
+	 * private static String labelScriptFile = "Messages_sc.sql";
+	 * 
+	 * private static String messageScriptFile = "Labels_sc.sql";
+	 * 
+	 * private static String currentScriptFile = "Scripts/Current_sc.sql";
+	 */
+
 	public static void main(String[] args) throws IOException {
-
-		File messagesEnFile = new File("Messages/messages.js");
-		File labelsEnFile = new File("Labels/labels.js");
-
-		File updateMessagesFile = new File("Messages/UpdateMessages.txt");
-		File updateLabelsFile = new File("Labels/UpdateLabels.txt");
-
-		File createMessagesFile = new File("Messages/CreateMessages.txt");
-		File createLabelsFile = new File("Labels/CreateLabels.txt");
 
 		BufferedReader updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateMessagesFile)));
 		BufferedReader messagesEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(messagesEnFile)));
 		BufferedReader labelsEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(labelsEnFile)));
+		BufferedReader currentScriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(currentScript)));
 
 		try {
 
 			// For Messages
 			StringBuffer stringBuffer = new StringBuffer();
-			String messageFileLine = "";
-
-			while ((messageFileLine = messagesEnBr.readLine()) != null)
-				stringBuffer.append(messageFileLine + "\r\n");
-
-			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "messages.js");
+			stringBuffer = readFileToBuffer(messagesEnBr, stringBuffer);
+			stringBuffer = updateLabelsOrMessagesInJs(updateAndCreateMsgBr, stringBuffer, messageFile, messagesEnScript, false);
 			updateAndCreateMsgBr.close();
-
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createMessagesFile)));
-			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "messages.js");
-			FileWriter writerMessage = new FileWriter(messagesEnFile);
-			writerMessage.write(stringBuffer.toString());
-			writerMessage.close();
+			stringBuffer = addLabelsOrMessagesInJs(updateAndCreateMsgBr, stringBuffer, messageFile, messagesEnScript, false);
 			updateAndCreateMsgBr.close();
+			writeUpdatedFile(messagesEnFile, stringBuffer);
 
 			// For Labels
-			String labelFileLine = "";
-			stringBuffer.delete(0, stringBuffer.length());
+			clearBuffer(stringBuffer);
+			updateAndCreateMsgBr.close();
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateLabelsFile)));
-			while ((labelFileLine = labelsEnBr.readLine()) != null)
-				stringBuffer.append(labelFileLine + "\r\n");
-
-			stringBuffer = updateLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "labels.js");
+			stringBuffer = readFileToBuffer(labelsEnBr, stringBuffer);
+			stringBuffer = updateLabelsOrMessagesInJs(updateAndCreateMsgBr, stringBuffer, labelFile, labelsEnScript, true);
 			updateAndCreateMsgBr.close();
-
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(createLabelsFile)));
-			stringBuffer = createLabelsOrMessages(updateAndCreateMsgBr, stringBuffer, "labels.js");
-			FileWriter writerLabel = new FileWriter(labelsEnFile);
-			writerLabel.write(stringBuffer.toString());
-			writerLabel.close();
+			stringBuffer = addLabelsOrMessagesInJs(updateAndCreateMsgBr, stringBuffer, labelFile, labelsEnScript, true);
 			updateAndCreateMsgBr.close();
+			writeUpdatedFile(labelsEnFile, stringBuffer);
+
+			// For Current Script File
+			clearBuffer(stringBuffer);
+			stringBuffer = readFileToBuffer(currentScriptBr, stringBuffer);
+			stringBuffer.append(addScriptBuffer);
+			writeUpdatedFile(currentScript, stringBuffer);
 
 		} catch (IOException ex) {
 
@@ -71,7 +89,7 @@ public class LabelsAndMessages
 		}
 	}
 
-	public static StringBuffer updateLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName) {
+	public static StringBuffer updateLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) throws IOException {
 
 		String newFileLine = "", updateMessageKey = "", updateMessageValue = "";
 
@@ -96,6 +114,7 @@ public class LabelsAndMessages
 						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be updated, because it's value is already added in " + fileName);
 					} else {
 						stringBuffer.replace(startIndex + 1, lastIndex, updateMessageValue);
+						updateLabelsOrMessagesInScript(updateMessageKey, updateMessageValue, fileScipt, isLabel);
 					}
 
 				} else {
@@ -104,14 +123,14 @@ public class LabelsAndMessages
 
 			}
 		} catch (IOException ex) {
-
+			throw ex;
 		}
 
 		return stringBuffer;
 
 	}
 
-	public static StringBuffer createLabelsOrMessages(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName) throws IOException {
+	public static StringBuffer addLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) throws IOException {
 
 		int commaIndex = 0;
 		int startIndex = 0;
@@ -132,6 +151,7 @@ public class LabelsAndMessages
 						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's value is already added in " + fileName);
 					} else {
 						stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
+						insertLabelsOrMessagesInScript(updateMessageKey, updateMessageValue, fileScipt, isLabel);
 					}
 				}
 			} else if (commaIndex == -1) {
@@ -147,11 +167,12 @@ public class LabelsAndMessages
 						System.out.println("The given key '" + updateMessageKey + "' and it's value can't be inserted, because it's value is already added in " + fileName);
 					} else {
 						stringBuffer.insert(stringBuffer.lastIndexOf(",") + 1, "\n" + newFileLine);
+						insertLabelsOrMessagesInScript(updateMessageKey, updateMessageValue, fileScipt, isLabel);
 					}
 				}
 			}
 		} catch (IOException ex) {
-
+			throw ex;
 		}
 		return stringBuffer;
 
@@ -173,6 +194,116 @@ public class LabelsAndMessages
 			index = m.start();
 		}
 		return index;
+	}
+
+	private static StringBuffer readFileToBuffer(BufferedReader messagesEnBr, StringBuffer stringBuffer) throws IOException {
+		try {
+			String fileLine = "";
+			while ((fileLine = messagesEnBr.readLine()) != null)
+				stringBuffer.append(fileLine + "\r\n");
+		} catch (IOException ex) {
+			throw ex;
+		}
+		return stringBuffer;
+	}
+
+	private static void writeUpdatedFile(File messagesEnFile, StringBuffer stringBuffer) throws IOException {
+		try {
+			FileWriter writeFile = new FileWriter(messagesEnFile);
+			writeFile.write(stringBuffer.toString());
+			writeFile.close();
+		} catch (IOException ex) {
+			throw ex;
+		}
+	}
+
+	private static StringBuffer clearBuffer(StringBuffer stringBuffer) {
+		stringBuffer.delete(0, stringBuffer.length());
+		return stringBuffer;
+	}
+
+	public static StringBuffer insertQueryGenerator(boolean isLabel, String key, String value, String language) {
+		StringBuffer query = new StringBuffer();
+		query.append("INSERT INTO Fusion_New_Label(fusion_language_id , label_key , label_base_value , label_display_value , label_type_id) ");
+		query.append("( SELECT FL.fusion_language_id , '");
+		query.append(key);
+		query.append("' , '");
+		query.append(value);
+		query.append("' , '");
+		query.append(value);
+		query.append("' , ");
+		query.append("LT.label_type_id FROM fusion_language FL, label_type LT ");
+		query.append("WHERE FL.language_value = '");
+		query.append(language);
+		query.append("' AND LT.label_type_name='");
+		query.append(isLabel ? "labels" : "messages");
+		query.append("');");
+
+		return query;
+	}
+
+	public static StringBuffer updateQueryGenerator(boolean isLabel, String key, String value, String language) {
+		StringBuffer query = new StringBuffer();
+		query.append("Update Fusion_New_Label set Label_Display_Value = '");
+		query.append(value);
+		query.append("' WHERE label_key = '");
+		query.append(key);
+		query.append("' AND Fusion_Language_Id = (select Fusion_Language_Id from Fusion_Language where Language_Value = '");
+		query.append(language);
+		query.append("') AND Label_Type_Id = (select Label_Type_Id from Label_Type where Label_Type_Name = '");
+		query.append(isLabel ? "labels" : "messages");
+		query.append("');");
+
+		return query;
+	}
+
+	public static void updateLabelsOrMessagesInScript(String updateMessageKey, String updateMessageValue, File fileScipt, Boolean isLabel) throws IOException {
+		int startIndex = 0;
+		int lastIndex = 0;
+		int tempIndex = 0;
+		StringBuffer stringBufferScript = new StringBuffer();
+		BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
+		try {
+			stringBufferScript = readFileToBuffer(scriptBr, stringBufferScript);
+			if (isContain(stringBufferScript.toString(), updateMessageKey)) {
+				tempIndex = isFindIndex(stringBufferScript.toString(), updateMessageKey);
+				tempIndex = stringBufferScript.indexOf(",", tempIndex + 1);
+				startIndex = stringBufferScript.indexOf("'", tempIndex + 1);
+				tempIndex = stringBufferScript.indexOf(",", startIndex + 1);
+				lastIndex = stringBufferScript.lastIndexOf("'", tempIndex);
+				stringBufferScript.replace(startIndex + 1, lastIndex, updateMessageValue);
+
+				tempIndex = isFindIndex(stringBufferScript.toString(), updateMessageValue);
+				tempIndex = stringBufferScript.indexOf(",", tempIndex + 1);
+				startIndex = stringBufferScript.indexOf("'", tempIndex + 1);
+				tempIndex = stringBufferScript.indexOf(",", startIndex + 1);
+				lastIndex = stringBufferScript.lastIndexOf("'", tempIndex);
+				stringBufferScript.replace(startIndex + 1, lastIndex, updateMessageValue);
+			}
+			writeUpdatedFile(fileScipt, stringBufferScript);
+			addScriptBuffer.append("\n");
+			addScriptBuffer.append(updateQueryGenerator(isLabel, updateMessageKey, updateMessageValue, "English"));
+		} catch (IOException ex) {
+			throw ex;
+		} finally {
+			scriptBr.close();
+		}
+	}
+
+	public static void insertLabelsOrMessagesInScript(String insertMessageKey, String insertMessageValue, File fileScipt, Boolean isLabel) throws IOException {
+		StringBuffer stringBufferScript = new StringBuffer();
+		BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
+		try {
+			stringBufferScript = readFileToBuffer(scriptBr, stringBufferScript);
+			stringBufferScript.append(insertQueryGenerator(isLabel, insertMessageKey, insertMessageValue, "English"));
+			writeUpdatedFile(fileScipt, stringBufferScript);
+			addScriptBuffer.append("\n");
+			addScriptBuffer.append(insertQueryGenerator(isLabel, insertMessageKey, insertMessageValue, "English"));
+		} catch (IOException ex) {
+			throw ex;
+		} finally {
+			scriptBr.close();
+		}
 	}
 
 }
