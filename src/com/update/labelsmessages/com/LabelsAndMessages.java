@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class LabelsAndMessages
 {
 
@@ -44,16 +47,21 @@ public class LabelsAndMessages
 	 * private static String currentScriptFile = "Scripts/Current_sc.sql";
 	 */
 
-	public static void main(String[] args) throws IOException {
+	private static final Logger log = LogManager.getLogger(LabelsAndMessages.class);
 
-		BufferedReader updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateMessagesFile)));
-		BufferedReader messagesEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(messagesEnFile)));
-		BufferedReader labelsEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(labelsEnFile)));
-		BufferedReader currentScriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(currentScript)));
+	public static void main(String[] args) {
 
 		try {
 
+			log.info("Entering main method...");
+
+			BufferedReader updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateMessagesFile)));
+			BufferedReader messagesEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(messagesEnFile)));
+			BufferedReader labelsEnBr = new BufferedReader(new InputStreamReader(new FileInputStream(labelsEnFile)));
+			BufferedReader currentScriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(currentScript)));
+
 			// For Messages
+			log.info("Started to update messages...");
 			StringBuffer stringBuffer = new StringBuffer();
 			stringBuffer = readFileToBuffer(messagesEnBr, stringBuffer);
 			stringBuffer = updateLabelsOrMessagesInJs(updateAndCreateMsgBr, stringBuffer, messageFile, messagesEnScript, false);
@@ -64,6 +72,7 @@ public class LabelsAndMessages
 			writeUpdatedFile(messagesEnFile, stringBuffer);
 
 			// For Labels
+			log.info("Started to update labels...");
 			clearBuffer(stringBuffer);
 			updateAndCreateMsgBr.close();
 			updateAndCreateMsgBr = new BufferedReader(new InputStreamReader(new FileInputStream(updateLabelsFile)));
@@ -81,15 +90,18 @@ public class LabelsAndMessages
 			stringBuffer.append(addScriptBuffer);
 			writeUpdatedFile(currentScript, stringBuffer);
 
-		} catch (IOException ex) {
-
-		} finally {
 			messagesEnBr.close();
 			labelsEnBr.close();
+
+		} catch (IOException ex) {
+			log.error("Error occured in main method :", ex);
+
 		}
 	}
 
-	public static StringBuffer updateLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) throws IOException {
+	public static StringBuffer updateLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) {
+
+		log.info("Entering updateLabelsOrMessagesInJs method...");
 
 		String newFileLine = "", updateMessageKey = "", updateMessageValue = "";
 
@@ -123,14 +135,16 @@ public class LabelsAndMessages
 
 			}
 		} catch (IOException ex) {
-			throw ex;
+			log.error("Error occured in updateLabelsOrMessagesInJs method :", ex);
 		}
 
 		return stringBuffer;
 
 	}
 
-	public static StringBuffer addLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) throws IOException {
+	public static StringBuffer addLabelsOrMessagesInJs(BufferedReader updateAndCreateMsgBr, StringBuffer stringBuffer, String fileName, File fileScipt, Boolean isLabel) {
+
+		log.info("Entering addLabelsOrMessagesInJs method...");
 
 		int commaIndex = 0;
 		int startIndex = 0;
@@ -172,7 +186,7 @@ public class LabelsAndMessages
 				}
 			}
 		} catch (IOException ex) {
-			throw ex;
+			log.error("Error occured in addLabelsOrMessagesInJs method :", ex);
 		}
 		return stringBuffer;
 
@@ -196,24 +210,26 @@ public class LabelsAndMessages
 		return index;
 	}
 
-	private static StringBuffer readFileToBuffer(BufferedReader messagesEnBr, StringBuffer stringBuffer) throws IOException {
+	private static StringBuffer readFileToBuffer(BufferedReader messagesEnBr, StringBuffer stringBuffer) {
+		log.info("Entering readFileToBuffer method...");
 		try {
 			String fileLine = "";
 			while ((fileLine = messagesEnBr.readLine()) != null)
 				stringBuffer.append(fileLine + "\r\n");
 		} catch (IOException ex) {
-			throw ex;
+			log.error("Error occured in readFileToBuffer method :", ex);
 		}
 		return stringBuffer;
 	}
 
-	private static void writeUpdatedFile(File messagesEnFile, StringBuffer stringBuffer) throws IOException {
+	private static void writeUpdatedFile(File messagesEnFile, StringBuffer stringBuffer) {
+		log.info("Entering writeUpdatedFile method...");
 		try {
 			FileWriter writeFile = new FileWriter(messagesEnFile);
 			writeFile.write(stringBuffer.toString());
 			writeFile.close();
 		} catch (IOException ex) {
-			throw ex;
+			log.error("Error occured in writeUpdatedFile method :", ex);
 		}
 	}
 
@@ -257,13 +273,14 @@ public class LabelsAndMessages
 		return query;
 	}
 
-	public static void updateLabelsOrMessagesInScript(String updateMessageKey, String updateMessageValue, File fileScipt, Boolean isLabel) throws IOException {
+	public static void updateLabelsOrMessagesInScript(String updateMessageKey, String updateMessageValue, File fileScipt, Boolean isLabel) {
+		log.info("Entering updateLabelsOrMessagesInScript method...");
 		int startIndex = 0;
 		int lastIndex = 0;
 		int tempIndex = 0;
 		StringBuffer stringBufferScript = new StringBuffer();
-		BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
 		try {
+			BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
 			stringBufferScript = readFileToBuffer(scriptBr, stringBufferScript);
 			if (isContain(stringBufferScript.toString(), updateMessageKey)) {
 				tempIndex = isFindIndex(stringBufferScript.toString(), updateMessageKey);
@@ -283,26 +300,25 @@ public class LabelsAndMessages
 			writeUpdatedFile(fileScipt, stringBufferScript);
 			addScriptBuffer.append("\n");
 			addScriptBuffer.append(updateQueryGenerator(isLabel, updateMessageKey, updateMessageValue, "English"));
-		} catch (IOException ex) {
-			throw ex;
-		} finally {
 			scriptBr.close();
+		} catch (IOException ex) {
+			log.error("Error occured in updateLabelsOrMessagesInScript method :", ex);
 		}
 	}
 
-	public static void insertLabelsOrMessagesInScript(String insertMessageKey, String insertMessageValue, File fileScipt, Boolean isLabel) throws IOException {
+	public static void insertLabelsOrMessagesInScript(String insertMessageKey, String insertMessageValue, File fileScipt, Boolean isLabel) {
+		log.info("Entering insertLabelsOrMessagesInScript method...");
 		StringBuffer stringBufferScript = new StringBuffer();
-		BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
 		try {
+			BufferedReader scriptBr = new BufferedReader(new InputStreamReader(new FileInputStream(fileScipt)));
 			stringBufferScript = readFileToBuffer(scriptBr, stringBufferScript);
 			stringBufferScript.append(insertQueryGenerator(isLabel, insertMessageKey, insertMessageValue, "English"));
 			writeUpdatedFile(fileScipt, stringBufferScript);
 			addScriptBuffer.append("\n");
 			addScriptBuffer.append(insertQueryGenerator(isLabel, insertMessageKey, insertMessageValue, "English"));
-		} catch (IOException ex) {
-			throw ex;
-		} finally {
 			scriptBr.close();
+		} catch (IOException ex) {
+			log.error("Error occured in insertLabelsOrMessagesInScript method :", ex);
 		}
 	}
 

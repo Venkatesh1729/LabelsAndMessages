@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- FATAL<ERROR<WARN<INFO<DEBUG<TRACE -->
+
+<Configuration>
+	<Properties>
+		<Property name="LOG_DIR">Logs</Property>
+        <Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+    </Properties>
+        
+    <Appenders>
+        <File name="FILE" fileName="Logs/logfile.log" append="true">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd-HH-mm-ss-SSS} [%t] %c %L- %msg%n"/>
+        </File>
+        
+        <Console name="consoleLog" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd-HH-mm-ss-SSS} [%t] %c %L- %msg%n"/>
+        </Console>
+        
+        <RollingFile name="rFile" fileName="Logs/RollingLogFile.log" filePattern="Logs/RollingLogFile-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="[%-5level] %d{yyyy-MM-dd-HH-mm-ss-SSS} [%t] %c %L- %msg%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"/>
+				<SizeBasedTriggeringPolicy size="1MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+		
+    </Appenders>
+
+    <Loggers>
+        
+        <!-- Logger that logs messages (console and log file) with level ERROR in package "com.foo" and its child packages -->
+        <Logger name="com.logger.example" level="debug" additivity="false">
+            <appender-ref ref="consoleLog"/>
+            <appender-ref ref="rFile"/>
+        </Logger>
+        
+        <!-- Root logger that logs messages with level INFO in the all packages(except the packages for which logger is already defined, see below ) -->
+        <Root level="info">
+            <appender-ref ref="consoleLog"/>
+            <appender-ref ref="rFile"/>
+        </Root>
+
+		<!-- All the log messages that are coming to the child appenders will be propagated to the parent appenders too,
+		In order to avoid this redundancy, we can use Log4j additivity.Just set the additivity property of an Log4j logger to false. -->
+    </Loggers>
+
+</Configuration>
